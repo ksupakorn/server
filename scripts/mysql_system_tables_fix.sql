@@ -657,6 +657,14 @@ ALTER TABLE user ADD max_statement_time decimal(12,6) DEFAULT 0 NOT NULL AFTER d
 ALTER TABLE user MODIFY password_expired ENUM('N', 'Y') COLLATE utf8_general_ci DEFAULT 'N' NOT NULL;
 ALTER TABLE user MODIFY is_role enum('N', 'Y') COLLATE utf8_general_ci DEFAULT 'N' NOT NULL;
 
+-- MDEV-24122 formerly mysql users may have the following columns.
+-- These are not used until MariaDB-10.4 will use these in the creation of mysql.global_priv:
+-- As such the below shouldn't exist in MariaDB-10.4 or beyond.
+
+ALTER TABLE user DROP COLUMN IF EXISTS password_lifetime,
+                 DROP COLUMN IF EXISTS password_last_changed,
+		 DROP COLUMN IF EXISTS account_locked;
+
 -- Need to pre-fill mysql.proxies_priv with access for root even when upgrading from
 -- older versions
 
