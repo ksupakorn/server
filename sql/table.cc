@@ -4247,7 +4247,6 @@ Table_check_intact::check(TABLE *table, const TABLE_FIELD_DEF *table_def)
                    table->alias.c_ptr(), table_def->count, table->s->fields,
                    static_cast<int>(table->s->mysql_version),
                    MYSQL_VERSION_ID);
-      DBUG_RETURN(TRUE);
     }
     else if (MYSQL_VERSION_ID == table->s->mysql_version)
     {
@@ -4255,8 +4254,12 @@ Table_check_intact::check(TABLE *table, const TABLE_FIELD_DEF *table_def)
                    ER_THD(thd, ER_COL_COUNT_DOESNT_MATCH_CORRUPTED_V2),
                    table->s->db.str, table->s->table_name.str,
                    table_def->count, table->s->fields);
+    }
+    if (table->s->fields < table_def->count)
+    {
       DBUG_RETURN(TRUE);
     }
+    error= TRUE;
     /*
       Something has definitely changed, but we're running an older
       version of MySQL with new system tables.
@@ -4265,7 +4268,7 @@ Table_check_intact::check(TABLE *table, const TABLE_FIELD_DEF *table_def)
       is backward compatible.
     */
   }
-  else
+
   {
   StringBuffer<1024> sql_type(system_charset_info);
   sql_type.extra_allocation(256); // Allocate min 256 characters at once
